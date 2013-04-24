@@ -20,13 +20,8 @@ Below are the tools (and their minimum versions) required to build PmLogCtl:
 - gcc 4.6.3
 - make (any version)
 - openwebos/cmake-modules-webos 1.0.0 RC2
-- openwebos/PmLogLib 2.0.0
+- openwebos/PmLogLib 3.0.0
 - pkg-config 0.26
-
-Below is the component (and its minimum version) required to run PmLogCtl:
-
-* openwebos/PmLogConf 2.0.0
-
 
 How to Build on Linux
 =====================
@@ -81,6 +76,7 @@ You will need to use `sudo` if you did not specify `WEBOS_INSTALL_ROOT`.
 All content, including all source code files and documentation files in this repository are:
 
  Copyright (c) 2007-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (c) Copyright 2013 LG Electronics
 
 All content, including all source code files and documentation files in this repository are:
 Licensed under the Apache License, Version 2.0 (the "License");

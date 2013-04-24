@@ -1,6 +1,7 @@
 /* @@@LICENSE
 *
 *      Copyright (c) 2007-2012 Hewlett-Packard Development Company, L.P.
+*      Copyright (c) Copyright 2013 LG Electronics
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -29,6 +30,8 @@
 
 
 #include "PmLogCtl.h"
+#include "PmLogLib.h"
+#include "PmLogMsg.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -36,9 +39,6 @@
 #include <string.h>
 #include <sys/klog.h>
 #include <sys/syslog.h>
-
-#include <PmLogLib.h>
-
 
 /**
  * @brief ParseFacility
@@ -618,6 +618,156 @@ static Result DoCmdLog(int argc, char* argv[])
 	return RESULT_OK;
 }
 
+/**
+ * @brief DoCmdLogKV
+ *
+ * Usage: logkv <context> <level> <msgID> <key>=<value> <...> <"messsage"> # log a message
+ *
+ * Test a call through PmLogLib to log a message on the given context
+ * with the given level. If the context does not exist it is an error.
+ *
+ * TODO : Add descriptions for new api.
+ */
+static Result DoCmdLogKV(int argc, char *argv[])
+{
+	int             paramIndex;
+	char*           arg;
+	const char*     contextName;
+	PmLogContext    context;
+	const int*      levelIntP;
+	PmLogErr        logErr;
+	const char*     msgID;
+	const char*     msg;
+	char            kvPair[1024];
+	bool            isCheckedKV = false;
+
+	contextName = NULL;
+	context = NULL;
+	levelIntP = NULL;
+	msgID = NULL;
+	msg = NULL;
+	memset(kvPair, 0x00, sizeof(kvPair));
+
+	if (argc < 5 ) {
+		printf("Number of parameters must be given more than 5\n");
+		return RESULT_PARAM_ERR;
+	}
+
+	paramIndex = 1;
+	while (paramIndex < argc) {
+		arg = argv[ paramIndex ];
+
+		if (contextName == NULL) {
+			contextName = arg;
+			contextName = PrvResolveContextNameAlias(contextName);
+			logErr = PmLogFindContext(contextName, &context);
+			if (logErr != kPmLogErr_None) {
+				printf("Invalid context '%s'.\n", arg);
+				return RESULT_PARAM_ERR;
+			}
+			paramIndex++;
+		} else if (levelIntP == NULL) {
+			levelIntP = PmLogStringToLevel(arg);
+			if ((levelIntP == NULL) ||
+				(*levelIntP == -1)) {
+				printf("Invalid level '%s'.\n", arg);
+				return RESULT_PARAM_ERR;
+			}
+			paramIndex++;
+		} else if (msgID == NULL) {
+			msgID = arg;
+			paramIndex++;
+		} else if (kvPair[0] == '\0' && !isCheckedKV) {
+			int   index = 0;
+			int   kvLength = 0;
+			bool  result = false;
+
+			isCheckedKV = true;
+
+			while(paramIndex < argc) {
+
+				if (paramIndex == argc - 1) {
+					// No more key and value pair.
+					break;
+				}
+
+				if (arg) {
+					char *keyBuffer = NULL;
+					char *valueBuffer = NULL;
+
+					if (index == 0) {
+						strncat(kvPair, "{", 1);
+						index += 1;
+					}
+
+					if (2 > sscanf(arg, "%m[^=]=%m[^\t\n]", &keyBuffer, &valueBuffer)) {
+						printf("key and value pair is wrong : %s\n", arg);
+						goto ERROR;
+					}
+
+					snprintf(kvPair + index, sizeof(kvPair) - index - 1,
+					         "\"%s\":%s", keyBuffer, valueBuffer);
+
+					kvLength = strlen(keyBuffer);
+					kvLength += 2; // add length for " "
+					kvLength += 1; // add length for :
+					kvLength += strlen(valueBuffer); // value
+
+					if (paramIndex == argc - 2) {
+						strncat(kvPair, "}", 1);
+					} else {
+						strncat(kvPair, ",", 1);
+						kvLength += 1; // add length for ,
+						index += kvLength; // index of next key and value pair
+					}
+
+					result = true;
+ERROR:
+					free(keyBuffer);
+					free(valueBuffer);
+
+					arg = argv[++paramIndex];
+
+					if (!result) {
+						return RESULT_PARAM_ERR;
+					}
+				} // validation if arg is exist
+			} // for loop for key and value parameter
+			kvPair[sizeof(kvPair) - 1] = '\0';
+		} else if (msg == NULL)	{
+			msg = arg;
+			paramIndex++;
+		} else {
+			printf("Invalid parameter '%s'.\n", arg);
+			return RESULT_PARAM_ERR;
+		}
+	}
+
+	if (contextName == NULL) {
+		printf("Context is not specified.\n");
+		return RESULT_PARAM_ERR;
+	}
+
+	if (levelIntP == NULL) {
+		printf("Level is not specified.\n");
+		return RESULT_PARAM_ERR;
+	}
+
+	if (msgID == NULL) {
+		printf("Message ID is not specified.\n");
+		return RESULT_PARAM_ERR;
+	}
+
+	logErr = PmLogString(context, *levelIntP, msgID, kvPair, msg);
+	if (logErr != kPmLogErr_None) {
+		printf("Error logging: 0x%08X (%s)\n", logErr,
+			PmLogGetErrDbgString(logErr));
+		return RESULT_RUN_ERR;
+	}
+
+	return RESULT_OK;
+}
+
 
 /**
  * @brief WriteKMsg
@@ -924,7 +1074,11 @@ static void ShowUsage(void)
 	printf("  help                         # show usage info\n");
 	printf("  def <context> [<level>]      # define logging context\n");
 	printf("  flush                        # flush all ring buffers\n");
-	printf("  log <context> <level> <msg>  # log a message\n");
+	printf("  log <context> <level> <message>\n");
+	printf("                               # log a message\n");
+	printf("  logkv <context> <level> <msgID> <key1>=<value1> <key2>=<value2> ... <message>\n");
+	printf("                               # log a message include msgID and key-value pairs\n");
+	printf("                               # If you want value be a string, use quoting => <key>=<\\\"value\\\">\n");
 	printf("  klog [-p <level>] <msg>      # log a kernel message\n");
 	printf("  reconf                       # re-load lib options from conf\n");
 	printf("  set <context> <level>        # set logging context level\n");
@@ -970,6 +1124,10 @@ int main(int argc, char* argv[])
 		else if (strcmp(cmd, "log") == 0)
 		{
 			result = DoCmdLog(argc - 1, &argv[1]);
+		}
+		else if (strcmp(cmd, "logkv") == 0)
+		{
+			result = DoCmdLogKV(argc - 1, &argv[1]);
 		}
 		else if (strcmp(cmd, "klog") == 0)
 		{

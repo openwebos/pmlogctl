@@ -1,6 +1,7 @@
 # @@@LICENSE
 #
 #      Copyright (c) 2011-2012 Hewlett-Packard Development Company, L.P.
+#      Copyright (c) Copyright 2013 LG Electronics
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,8 +26,8 @@ cmake_minimum_required(VERSION 2.8.7)
 project(PmLogCtl C)
 
 include(webOS/webOS)
-webos_modules_init(1 0 0 QUALIFIER RC2)
-webos_component(2 0 0)
+webos_modules_init(1 0 0 QUALIFIER RC4)
+webos_component(3 0 0)
 
 include(FindPkgConfig)
 
