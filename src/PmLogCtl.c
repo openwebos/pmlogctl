@@ -30,7 +30,6 @@
 
 #include "PmLogCtl.h"
 #include "PmLogLib.h"
-#include "PmLogMsg.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -647,8 +646,8 @@ static Result DoCmdLogKV(int argc, char *argv[])
 	msg = NULL;
 	memset(kvPair, 0x00, sizeof(kvPair));
 
-	if (argc < 5 ) {
-		printf("Number of parameters must be given more than 5\n");
+	if (argc < 4 ) {
+		printf("Minimum 4 parameters are expected. Please see help for more details.\n");
 		return RESULT_PARAM_ERR;
 	}
 
@@ -673,10 +672,12 @@ static Result DoCmdLogKV(int argc, char *argv[])
 				return RESULT_PARAM_ERR;
 			}
 			paramIndex++;
-		} else if (msgID == NULL) {
+		} else if (msgID == NULL && *levelIntP != kPmLogLevel_Debug) {
 			msgID = arg;
 			paramIndex++;
-		} else if (kvPair[0] == '\0' && !isCheckedKV) {
+		} else if (kvPair[0] == '\0' &&
+                   !isCheckedKV &&
+                   *levelIntP != kPmLogLevel_Debug) {
 			int   index = 0;
 			int   kvLength = 0;
 			bool  result = false;
@@ -752,12 +753,14 @@ ERROR:
 		return RESULT_PARAM_ERR;
 	}
 
-	if (msgID == NULL) {
+	if (msgID == NULL && *levelIntP != kPmLogLevel_Debug) {
 		printf("Message ID is not specified.\n");
 		return RESULT_PARAM_ERR;
 	}
 
-	logErr = PmLogString(context, *levelIntP, msgID, kvPair, msg);
+	logErr = PmLogString(context, *levelIntP, msgID,
+                         *levelIntP == kPmLogLevel_Debug ? NULL : kvPair,
+                         msg);
 	if (logErr != kPmLogErr_None) {
 		printf("Error logging: 0x%08X (%s)\n", logErr,
 			PmLogGetErrDbgString(logErr));
@@ -1078,6 +1081,7 @@ static void ShowUsage(void)
 	printf("  logkv <context> <level> <msgID> <key1>=<value1> <key2>=<value2> ... <message>\n");
 	printf("                               # log a message include msgID and key-value pairs\n");
 	printf("                               # If you want value be a string, use quoting => <key>=<\\\"value\\\">\n");
+	printf("                               # Debug level message takes only freetext. msgID and key-value pairs are not needed\n");
 	printf("  klog [-p <level>] <msg>      # log a kernel message\n");
 	printf("  reconf                       # re-load lib options from conf\n");
 	printf("  set <context> <level>        # set logging context level\n");
