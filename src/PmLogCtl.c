@@ -917,7 +917,7 @@ static Result DoCmdFlush()
 	PmLogErr		logErr;
 	PmLogContext	context;
 
-	logErr = PmLogFindContext("PmLogCtl", &context);
+	logErr = PmLogGetContext("pmlogctl", &context);
 	if (logErr != kPmLogErr_None)
 	{
 		printf("Error getting context PmLogCtl: 0x%08X (%s)\n", logErr,
@@ -925,7 +925,7 @@ static Result DoCmdFlush()
 		return RESULT_RUN_ERR;
 	}
 
-	logErr = PmLogPrint(context, kPmLogLevel_Emergency, "Manually Flushing Buffers");
+	logErr = PmLogInfo(context, "FLUSH_BUFFER", 0, "Manually Flushing Buffers");
 	if (logErr != kPmLogErr_None)
 	{
 		printf("Error logging: 0x%08X (%s)\n", logErr,
