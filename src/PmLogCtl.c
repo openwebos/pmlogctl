@@ -686,8 +686,10 @@ static Result DoCmdLogKV(int argc, char *argv[])
 
 			while(paramIndex < argc) {
 
-				if (paramIndex == argc - 1) {
-					// No more key and value pair.
+				if (paramIndex == argc - 1) { // No more key and value pair.
+					if (paramIndex == 4) { // free text only
+						snprintf(kvPair, sizeof(kvPair), "{}");
+					}
 					break;
 				}
 
