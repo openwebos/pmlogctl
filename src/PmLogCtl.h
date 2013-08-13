@@ -38,6 +38,8 @@
 
 #define COMPONENT_PREFIX	"PmLogCtl: "
 
+extern bool flag_silence;
+
 #define DbgPrint(...) \
 	{														\
 		fprintf(stdout, COMPONENT_PREFIX __VA_ARGS__);		\
@@ -45,7 +47,8 @@
 
 #define ErrPrint(...) \
 	{														\
-		fprintf(stderr, COMPONENT_PREFIX __VA_ARGS__);		\
+		if (!flag_silence)									\
+			fprintf(stderr, COMPONENT_PREFIX __VA_ARGS__);	\
 	}
 
 
