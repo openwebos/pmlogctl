@@ -120,7 +120,7 @@ const char* GetLevelStr(int level)
  */
 static void SuggestHelp(void)
 {
-	printf("Use -help for usage information.\n");
+	ErrPrint("Use -help for usage information.\n");
 }
 
 
@@ -1015,7 +1015,7 @@ static Result DoCmdDef(int argc, char* argv[])
 			if (logErr == kPmLogErr_None)
 			{
 				ErrPrint("Context '%s' is already defined.\n", contextName);
-				return RESULT_PARAM_ERR;
+				return RESULT_OK;
 			}
 			i++;
 		}
@@ -1075,32 +1075,32 @@ static void ShowUsage(void)
 {
 	int	level;
 
-	printf("PmLogCtl COMMAND [PARAM...]\n");
-	printf("PmLogCtl -s COMMAND [PARAM...] # disable stdout messages\n");
-	printf("  help                         # show usage info\n");
-	printf("  def <context> [<level>]      # define logging context\n");
-	printf("  flush                        # flush all ring buffers\n");
-	printf("  log <context> <level> <message>\n");
-	printf("                               # log a message\n");
-	printf("  logkv <context> <level> <msgID> <key1>=<value1> <key2>=<value2> ... <message>\n");
-	printf("                               # log a message include msgID and key-value pairs\n");
-	printf("                               # If you want value be a string, use quoting => <key>=<\\\"value\\\">\n");
-	printf("                               # Debug level message takes only freetext. msgID and key-value pairs are not needed\n");
-	printf("  klog [-p <level>] <msg>      # log a kernel message\n");
-	printf("  reconf                       # re-load lib options from conf\n");
-	printf("  set <context> <level>        # set logging context level\n");
-	printf("  show [<context>]             # show logging context(s)\n");
-	printf("\n");
+	ErrPrint("PmLogCtl COMMAND [PARAM...]\n");
+	ErrPrint("PmLogCtl -s COMMAND [PARAM...] # disable stdout messages\n");
+	ErrPrint("  help                         # show usage info\n");
+	ErrPrint("  def <context> [<level>]      # define logging context\n");
+	ErrPrint("  flush                        # flush all ring buffers\n");
+	ErrPrint("  log <context> <level> <message>\n");
+	ErrPrint("                               # log a message\n");
+	ErrPrint("  logkv <context> <level> <msgID> <key1>=<value1> <key2>=<value2> ... <message>\n");
+	ErrPrint("                               # log a message include msgID and key-value pairs\n");
+	ErrPrint("                               # If you want value be a string, use quoting => <key>=<\\\"value\\\">\n");
+	ErrPrint("                               # Debug level message takes only freetext. msgID and key-value pairs are not needed\n");
+	ErrPrint("  klog [-p <level>] <msg>      # log a kernel message\n");
+	ErrPrint("  reconf                       # re-load lib options from conf\n");
+	ErrPrint("  set <context> <level>        # set logging context level\n");
+	ErrPrint("  show [<context>]             # show logging context(s)\n");
+	ErrPrint("\n");
 
-	printf("Contexts:\n");
-	printf("  The global context can be specified as '.'\n");
+	ErrPrint("Contexts:\n");
+	ErrPrint("  The global context can be specified as '.'\n");
 
-	printf("\n");
+	ErrPrint("\n");
 
-	printf("Levels:\n");
+	ErrPrint("Levels:\n");
 	for (level = -1 /* kPmLogLevel_None */; level <= 7; level++)
 	{
-		printf("  %-10s  # %d\n", PmLogLevelToString(level), level);
+		ErrPrint("  %-10s  # %d\n", PmLogLevelToString(level), level);
 	}
 }
 
@@ -1119,7 +1119,7 @@ int main(int argc, char* argv[])
 	{
 		if (argc < 2)
 		{
-			printf("No command specified.\n");
+			ErrPrint("No command specified.\n");
 			result = RESULT_PARAM_ERR;
 			break;
 		}
@@ -1129,9 +1129,15 @@ int main(int argc, char* argv[])
 		if (strncmp(cmd, "-s", 2) == 0)
 		{
 			flag_silence = true;
-			cmd = argv[2];
-			cmd_index = &argv[2];
-			modified_argc = argc - 2;
+			if (argv[2]) { // parameter next "-s" option
+				cmd = argv[2];
+				cmd_index = &argv[2];
+				modified_argc = argc - 2;
+			} else {
+				ErrPrint("No command specified.\n");
+				result = RESULT_PARAM_ERR;
+				break;
+			}
 		}
 		else
 		{
@@ -1183,7 +1189,7 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			printf("Invalid command '%s'\n", cmd);
+			ErrPrint("Invalid command '%s'\n", cmd);
 			result = RESULT_PARAM_ERR;
 		}
 	}
