@@ -1068,7 +1068,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 	ViewLog_t*	viewLogP;
 	int			iLogFile;
 	bool		gotLine    [ PMLOGVIEW_MAX_LOG_FILES ];
-	ParsedMsg	parsedMsgs [ PMLOGVIEW_MAX_LOG_FILES ];
+	ParsedMsg*	parsedMsgs [ PMLOGVIEW_MAX_LOG_FILES ];
 	ParsedMsg*	parsedMsgP;
 	ParsedMsg*	theParsedMsgP;
 	int			theLogFile;
@@ -1078,7 +1078,11 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 	/* clear memory */
 	memset(&viewLogs, 0, sizeof(viewLogs));
 	memset(&gotLine, 0, sizeof(gotLine));
-	memset(&parsedMsgs, 0, sizeof(parsedMsgs));
+
+	for (iLogFile = 0; iLogFile < PMLOGVIEW_MAX_LOG_FILES; iLogFile++)
+	{
+		parsedMsgs[iLogFile] = (ParsedMsg*) malloc(sizeof(*parsedMsgs[iLogFile]));
+	}
 
 	/* clear logical data */
 	for (iLogFile = 0; iLogFile < PMLOGVIEW_MAX_LOG_FILES; iLogFile++)
@@ -1109,7 +1113,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 	for (iLogFile = 0; iLogFile < configP->numLogs; iLogFile++)
 	{
 		viewLogP = &viewLogs.viewLogs[ iLogFile ];
-		parsedMsgP = &parsedMsgs[ iLogFile ];
+		parsedMsgP = parsedMsgs[ iLogFile ];
 		gotLine[ iLogFile ] = GetNextLogLine(viewLogP, parsedMsgP);
 	}
 
@@ -1127,7 +1131,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 			}
 
 			viewLogP = &viewLogs.viewLogs[ iLogFile ];
-			parsedMsgP = &parsedMsgs[ iLogFile ];
+			parsedMsgP = parsedMsgs[ iLogFile ];
 
 			/* if no previous message, take this one */
 			if (theParsedMsgP == NULL)
@@ -1164,7 +1168,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 
 		/* advance the file */
 		viewLogP = &viewLogs.viewLogs[ theLogFile ];
-		parsedMsgP = &parsedMsgs[ theLogFile ];
+		parsedMsgP = parsedMsgs[ theLogFile ];
 		gotLine[ theLogFile ] = GetNextLogLine(viewLogP, parsedMsgP);
 	}
 
@@ -1178,6 +1182,11 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 			(void) fclose(viewLogP->segmentFile);
 			viewLogP->segmentFile = NULL;
 		}
+	}
+
+	for (iLogFile = 0; iLogFile < PMLOGVIEW_MAX_LOG_FILES; iLogFile++)
+	{
+		free(parsedMsgs[ theLogFile ]);
 	}
 }
 

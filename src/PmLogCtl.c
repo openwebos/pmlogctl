@@ -339,7 +339,7 @@ static void ShowContext(const ContextInfo_t* contextInfoP)
 static Result DoCmdShow(int argc, char* argv[])
 {
 	const char*		matchContextName;
-	ContextsInfo_t	contextInfos;
+	ContextsInfo_t* 	contextInfos = NULL;
 	PmLogErr 		logErr;
 	int				i;
 	ContextInfo_t*	contextInfoP;
@@ -358,23 +358,31 @@ static Result DoCmdShow(int argc, char* argv[])
 		return RESULT_PARAM_ERR;
 	}
 
-	logErr = PrvGetContextList(&contextInfos, matchContextName);
+	contextInfos = (ContextsInfo_t*) malloc(sizeof(*contextInfos));
+	if (!contextInfos)
+	{
+		ErrPrint("Out of memory.\n");
+		return RESULT_RUN_ERR;
+	}
+
+	logErr = PrvGetContextList(contextInfos, matchContextName);
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error getting contexts info: 0x%08X (%s)\n", logErr,
 			PmLogGetErrDbgString(logErr));
+		free(contextInfos);
 		return RESULT_RUN_ERR;
 	}
 
-	for (i = 0; i < contextInfos.numContexts; i++)
+	for (i = 0; i < contextInfos->numContexts; i++)
 	{
-		contextInfoP = &contextInfos.contextInfos[ i ];
+		contextInfoP = &contextInfos->contextInfos[ i ];
 		ShowContext(contextInfoP);
 	}
 
 	if (matchContextName != NULL)
 	{
-		if (contextInfos.numContexts == 0)
+		if (contextInfos->numContexts == 0)
 		{
 			if (PrvIsWildcardContextName(matchContextName))
 			{
@@ -384,10 +392,12 @@ static Result DoCmdShow(int argc, char* argv[])
 			{
 				ErrPrint("Context '%s' not found.\n", matchContextName);
 			}
+			free(contextInfos);
 			return RESULT_RUN_ERR;
 		}
 	}
 
+        free(contextInfos);
 	return RESULT_OK;
 }
 
@@ -408,7 +418,7 @@ static Result DoCmdSet(int argc, char* argv[])
 	PmLogContext	matchedContext;
 	const int*		levelIntP;
 	PmLogErr		logErr;
-	ContextsInfo_t	contextInfos;
+	ContextsInfo_t*	contextInfos = NULL;
 	ContextInfo_t*	contextInfoP;
 
 	matchContextName = NULL;
@@ -468,23 +478,31 @@ static Result DoCmdSet(int argc, char* argv[])
 	{
 		/* If a specific context wasn't matched, it's a wildcard match */
 
-		logErr = PrvGetContextList(&contextInfos, matchContextName);
+		contextInfos = (ContextsInfo_t*) malloc(sizeof(*contextInfos));
+		if (!contextInfos)
+		{
+			ErrPrint("Out of memory.\n");
+			return RESULT_RUN_ERR;
+		}
+		logErr = PrvGetContextList(contextInfos, matchContextName);
 		if (logErr != kPmLogErr_None)
 		{
 			ErrPrint("Error getting contexts info: 0x%08X (%s)\n", logErr,
 				PmLogGetErrDbgString(logErr));
+			free(contextInfos);
 			return RESULT_RUN_ERR;
 		}
 
-		if (contextInfos.numContexts == 0)
+		if (contextInfos->numContexts == 0)
 		{
 			ErrPrint("No contexts matched '%s'.\n", matchContextName);
+			free(contextInfos);
 			return RESULT_RUN_ERR;
 		}
 
-		for (i = 0; i < contextInfos.numContexts; i++)
+		for (i = 0; i < contextInfos->numContexts; i++)
 		{
-			contextInfoP = &contextInfos.contextInfos[ i ];
+			contextInfoP = &contextInfos->contextInfos[ i ];
 
 			ErrPrint("Setting context level for '%s'.\n",
 				contextInfoP->contextName);
@@ -494,6 +512,7 @@ static Result DoCmdSet(int argc, char* argv[])
 			{
 				ErrPrint("Error setting context log level: 0x%08X (%s)\n", logErr,
 					PmLogGetErrDbgString(logErr));
+				free(contextInfos);
 				return RESULT_RUN_ERR;
 			}
 		}
@@ -705,30 +724,31 @@ static Result DoCmdLogKV(int argc, char *argv[])
 
 					if (2 > sscanf(arg, "%m[^=]=%m[^\t\n]", &keyBuffer, &valueBuffer)) {
 						ErrPrint("key and value pair is wrong : %s\n", arg);
-						goto ERROR;
 					}
 
-					snprintf(kvPair + index, sizeof(kvPair) - index - 1,
+					else {
+						snprintf(kvPair + index, sizeof(kvPair) - index - 1,
 					         "\"%s\":%s", keyBuffer, valueBuffer);
 
-					kvLength = strlen(keyBuffer);
-					kvLength += 2; // add length for " "
-					kvLength += 1; // add length for :
-					kvLength += strlen(valueBuffer); // value
+						kvLength = strlen(keyBuffer);
+						kvLength += 2; // add length for " "
+						kvLength += 1; // add length for :
+						kvLength += strlen(valueBuffer); // value
 
-					if (paramIndex == argc - 2) {
-						strncat(kvPair, "}", 1);
-					} else {
-						strncat(kvPair, ",", 1);
-						kvLength += 1; // add length for ,
-						index += kvLength; // index of next key and value pair
+						if (paramIndex == argc - 2) {
+							strncat(kvPair, "}", 1);
+						} else {
+							strncat(kvPair, ",", 1);
+							kvLength += 1; // add length for ,
+							index += kvLength; // index of next key and value pair
+						}
+
+						result = true;
 					}
-
-					result = true;
-ERROR:
-					free(keyBuffer);
-					free(valueBuffer);
-
+					if(keyBuffer)
+						free(keyBuffer);
+					if(valueBuffer)
+						free(valueBuffer);
 					arg = argv[++paramIndex];
 
 					if (!result) {
