@@ -46,11 +46,12 @@ bool flag_silence = false;
  * "user" => LOG_USER, etc.
  * @return true if parsed OK, else false.
  */
-bool ParseFacility(const char* facilityStr, int* facilityP)
+bool ParseFacility(const char *facilityStr, int *facilityP)
 {
-	const int* nP;
+	const int *nP;
 
 	nP = PmLogStringToFacility(facilityStr);
+
 	if (nP != NULL)
 	{
 		*facilityP = *nP;
@@ -68,11 +69,12 @@ bool ParseFacility(const char* facilityStr, int* facilityP)
  * "err" => LOG_ERR, etc.
  * @return true if parsed OK, else false.
  */
-bool ParseLevel(const char* levelStr, int* levelP)
+bool ParseLevel(const char *levelStr, int *levelP)
 {
-	const int* nP;
+	const int *nP;
 
 	nP = PmLogStringToLevel(levelStr);
+
 	if (nP != NULL)
 	{
 		*levelP = *nP;
@@ -89,9 +91,9 @@ bool ParseLevel(const char* levelStr, int* levelP)
  *
  * LOG_USER => "user", etc.  NULL if not recognized.
  */
-const char* GetFacilityStr(int facility)
+const char *GetFacilityStr(int facility)
 {
-	const char* facilityStr;
+	const char *facilityStr;
 
 	facilityStr = PmLogFacilityToString(facility);
 	return facilityStr;
@@ -103,9 +105,9 @@ const char* GetFacilityStr(int facility)
  *
  * LOG_ERR => "err", etc. NULL if not recognized.
  */
-const char* GetLevelStr(int level)
+const char *GetLevelStr(int level)
 {
-	const char* levelStr;
+	const char *levelStr;
 
 	levelStr = PmLogLevelToString(level);
 	return levelStr;
@@ -127,7 +129,7 @@ static void SuggestHelp(void)
 /**
  * @brief PrvIsWildcardContextName
  */
-static bool PrvIsWildcardContextName(const char* matchContextName)
+static bool PrvIsWildcardContextName(const char *matchContextName)
 {
 	if (strchr(matchContextName, '*') != NULL)
 	{
@@ -145,11 +147,11 @@ static bool PrvIsWildcardContextName(const char* matchContextName)
  * true if it matches.
  * If matchContextName is NULL it means to match all.
  */
-static bool PrvMatchContextName(const char* contextName,
-	const char* matchContextName)
+static bool PrvMatchContextName(const char *contextName,
+                                const char *matchContextName)
 {
-	const char* matchWildStr;
-	size_t		matchPrefixLen;
+	const char *matchWildStr;
+	size_t      matchPrefixLen;
 
 	if (matchContextName == NULL)
 	{
@@ -159,6 +161,7 @@ static bool PrvMatchContextName(const char* contextName,
 	/* to start, only match one wildcard '*' at the end */
 
 	matchWildStr = strchr(matchContextName, '*');
+
 	if (matchWildStr == NULL)
 	{
 		/* no wildcard means we need an exact match */
@@ -173,6 +176,7 @@ static bool PrvMatchContextName(const char* contextName,
 		 * we just need to match any characters before (if any) */
 
 		matchPrefixLen = matchWildStr - matchContextName;
+
 		if (matchPrefixLen == 0)
 		{
 			return true;
@@ -190,16 +194,16 @@ static bool PrvMatchContextName(const char* contextName,
 
 typedef struct
 {
-	PmLogContext	context;
-	char			contextName[ PMLOG_MAX_CONTEXT_NAME_LEN + 1 ];
+	PmLogContext    context;
+	char            contextName[ PMLOG_MAX_CONTEXT_NAME_LEN + 1 ];
 }
 ContextInfo_t;
 
 
 typedef struct
 {
-	int				numContexts;
-	ContextInfo_t	contextInfos[ PMLOG_MAX_NUM_CONTEXTS + 1];
+	int             numContexts;
+	ContextInfo_t   contextInfos[ PMLOG_MAX_NUM_CONTEXTS + 1];
 }
 ContextsInfo_t;
 
@@ -207,10 +211,10 @@ ContextsInfo_t;
 /**
  * @brief SortCmpContextInfoByName
  */
-static int SortCmpContextInfoByName(const void* p1, const void* p2)
+static int SortCmpContextInfoByName(const void *p1, const void *p2)
 {
-	const ContextInfo_t* context1P	= (const ContextInfo_t*) p1;
-	const ContextInfo_t* context2P	= (const ContextInfo_t*) p2;
+	const ContextInfo_t *context1P  = (const ContextInfo_t *) p1;
+	const ContextInfo_t *context2P  = (const ContextInfo_t *) p2;
 
 	return strcasecmp(context1P->contextName, context2P->contextName);
 }
@@ -219,13 +223,13 @@ static int SortCmpContextInfoByName(const void* p1, const void* p2)
 /**
  * @brief PrvGetContextList
  */
-static PmLogErr PrvGetContextList(ContextsInfo_t* contextInfosP,
-	const char* matchContextName)
+static PmLogErr PrvGetContextList(ContextsInfo_t *contextInfosP,
+                                  const char *matchContextName)
 {
-	PmLogErr 		logErr;
-	int				n;
-	int				i;
-	ContextInfo_t*	contextInfoP;
+	PmLogErr        logErr;
+	int             n;
+	int             i;
+	ContextInfo_t  *contextInfoP;
 
 	memset(contextInfosP, 0, sizeof(*contextInfosP));
 
@@ -233,6 +237,7 @@ static PmLogErr PrvGetContextList(ContextsInfo_t* contextInfosP,
 
 	n = 0;
 	logErr = PmLogGetNumContexts(&n);
+
 	if (logErr != kPmLogErr_None)
 	{
 		return logErr;
@@ -249,6 +254,7 @@ static PmLogErr PrvGetContextList(ContextsInfo_t* contextInfosP,
 
 		contextInfoP->context = NULL;
 		logErr = PmLogGetIndContext(i, &contextInfoP->context);
+
 		if (logErr != kPmLogErr_None)
 		{
 			return logErr;
@@ -256,7 +262,8 @@ static PmLogErr PrvGetContextList(ContextsInfo_t* contextInfosP,
 
 		contextInfoP->contextName[ 0 ] = 0;
 		logErr = PmLogGetContextName(contextInfoP->context,
-			contextInfoP->contextName, sizeof(contextInfoP->contextName));
+		                             contextInfoP->contextName, sizeof(contextInfoP->contextName));
+
 		if (logErr != kPmLogErr_None)
 		{
 			return logErr;
@@ -278,7 +285,7 @@ static PmLogErr PrvGetContextList(ContextsInfo_t* contextInfosP,
 	if (contextInfosP->numContexts > 0)
 	{
 		qsort(&contextInfosP->contextInfos, contextInfosP->numContexts,
-			sizeof(ContextInfo_t), SortCmpContextInfoByName);
+		      sizeof(ContextInfo_t), SortCmpContextInfoByName);
 	}
 
 	return kPmLogErr_None;
@@ -292,7 +299,7 @@ static PmLogErr PrvGetContextList(ContextsInfo_t* contextInfosP,
  * "<global>" to refer to the global context, we also accept "." to
  * mean the same.
  */
-static const char* PrvResolveContextNameAlias(const char* contextName)
+static const char *PrvResolveContextNameAlias(const char *contextName)
 {
 	if (strcmp(contextName, ".") == 0)
 	{
@@ -314,11 +321,12 @@ static const char* PrvResolveContextNameAlias(const char* contextName)
  *
  * @return 1 if matched else 0.
  */
-static void ShowContext(const ContextInfo_t* contextInfoP)
+static void ShowContext(const ContextInfo_t *contextInfoP)
 {
-	const char*	levelStr;
+	const char *levelStr;
 
 	levelStr = PmLogLevelToString(contextInfoP->context->enabledLevel);
+
 	if (levelStr == NULL)
 	{
 		levelStr = "Unknown";
@@ -336,13 +344,13 @@ static void ShowContext(const ContextInfo_t* contextInfoP)
  * By default, show information about all registered logging contexts,
  * else show information for the specified context.
  */
-static Result DoCmdShow(int argc, char* argv[])
+static Result DoCmdShow(int argc, char *argv[])
 {
-	const char*		matchContextName;
-	ContextsInfo_t* 	contextInfos = NULL;
-	PmLogErr 		logErr;
-	int				i;
-	ContextInfo_t*	contextInfoP;
+	const char     *matchContextName;
+	ContextsInfo_t     *contextInfos = NULL;
+	PmLogErr        logErr;
+	int             i;
+	ContextInfo_t  *contextInfoP;
 
 	matchContextName = NULL;
 
@@ -358,7 +366,8 @@ static Result DoCmdShow(int argc, char* argv[])
 		return RESULT_PARAM_ERR;
 	}
 
-	contextInfos = (ContextsInfo_t*) malloc(sizeof(*contextInfos));
+	contextInfos = (ContextsInfo_t *) malloc(sizeof(*contextInfos));
+
 	if (!contextInfos)
 	{
 		ErrPrint("Out of memory.\n");
@@ -366,10 +375,11 @@ static Result DoCmdShow(int argc, char* argv[])
 	}
 
 	logErr = PrvGetContextList(contextInfos, matchContextName);
+
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error getting contexts info: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		free(contextInfos);
 		return RESULT_RUN_ERR;
 	}
@@ -392,12 +402,13 @@ static Result DoCmdShow(int argc, char* argv[])
 			{
 				ErrPrint("Context '%s' not found.\n", matchContextName);
 			}
+
 			free(contextInfos);
 			return RESULT_RUN_ERR;
 		}
 	}
 
-        free(contextInfos);
+	free(contextInfos);
 	return RESULT_OK;
 }
 
@@ -410,22 +421,23 @@ static Result DoCmdShow(int argc, char* argv[])
  * Set the active logging level for the specified context.
  * If the context does not already exist, it is an error.
  */
-static Result DoCmdSet(int argc, char* argv[])
+static Result DoCmdSet(int argc, char *argv[])
 {
-	int				i;
-	const char*		arg;
-	const char*		matchContextName;
-	PmLogContext	matchedContext;
-	const int*		levelIntP;
-	PmLogErr		logErr;
-	ContextsInfo_t*	contextInfos = NULL;
-	ContextInfo_t*	contextInfoP;
+	int             i;
+	const char     *arg;
+	const char     *matchContextName;
+	PmLogContext    matchedContext;
+	const int      *levelIntP;
+	PmLogErr        logErr;
+	ContextsInfo_t *contextInfos = NULL;
+	ContextInfo_t  *contextInfoP;
 
 	matchContextName = NULL;
 	matchedContext = NULL;
 	levelIntP = NULL;
 
 	i = 1;
+
 	while (i < argc)
 	{
 		arg = argv[ i ];
@@ -434,25 +446,30 @@ static Result DoCmdSet(int argc, char* argv[])
 		{
 			matchContextName = arg;
 			matchContextName = PrvResolveContextNameAlias(matchContextName);
+
 			if (!PrvIsWildcardContextName(matchContextName))
 			{
 				logErr = PmLogFindContext(matchContextName, &matchedContext);
+
 				if (logErr != kPmLogErr_None)
 				{
 					ErrPrint("Context '%s' not found.\n", matchContextName);
 					return RESULT_PARAM_ERR;
 				}
 			}
+
 			i++;
 		}
 		else if (levelIntP == NULL)
 		{
 			levelIntP = PmLogStringToLevel(arg);
+
 			if (levelIntP == NULL)
 			{
 				ErrPrint("Invalid level '%s'.\n", arg);
 				return RESULT_PARAM_ERR;
 			}
+
 			i++;
 		}
 		else
@@ -478,17 +495,20 @@ static Result DoCmdSet(int argc, char* argv[])
 	{
 		/* If a specific context wasn't matched, it's a wildcard match */
 
-		contextInfos = (ContextsInfo_t*) malloc(sizeof(*contextInfos));
+		contextInfos = (ContextsInfo_t *) malloc(sizeof(*contextInfos));
+
 		if (!contextInfos)
 		{
 			ErrPrint("Out of memory.\n");
 			return RESULT_RUN_ERR;
 		}
+
 		logErr = PrvGetContextList(contextInfos, matchContextName);
+
 		if (logErr != kPmLogErr_None)
 		{
 			ErrPrint("Error getting contexts info: 0x%08X (%s)\n", logErr,
-				PmLogGetErrDbgString(logErr));
+			         PmLogGetErrDbgString(logErr));
 			free(contextInfos);
 			return RESULT_RUN_ERR;
 		}
@@ -505,13 +525,14 @@ static Result DoCmdSet(int argc, char* argv[])
 			contextInfoP = &contextInfos->contextInfos[ i ];
 
 			ErrPrint("Setting context level for '%s'.\n",
-				contextInfoP->contextName);
+			         contextInfoP->contextName);
 
 			logErr = PmLogSetContextLevel(contextInfoP->context, *levelIntP);
+
 			if (logErr != kPmLogErr_None)
 			{
 				ErrPrint("Error setting context log level: 0x%08X (%s)\n", logErr,
-					PmLogGetErrDbgString(logErr));
+				         PmLogGetErrDbgString(logErr));
 				free(contextInfos);
 				return RESULT_RUN_ERR;
 			}
@@ -522,10 +543,11 @@ static Result DoCmdSet(int argc, char* argv[])
 		ErrPrint("Setting context level for '%s'.\n", matchContextName);
 
 		logErr = PmLogSetContextLevel(matchedContext, *levelIntP);
+
 		if (logErr != kPmLogErr_None)
 		{
 			ErrPrint("Error setting context log level: 0x%08X (%s)\n", logErr,
-				PmLogGetErrDbgString(logErr));
+			         PmLogGetErrDbgString(logErr));
 			return RESULT_RUN_ERR;
 		}
 	}
@@ -542,16 +564,16 @@ static Result DoCmdSet(int argc, char* argv[])
  * Test a call through PmLogLib to log a message on the given context
  * with the given level. If the context does not exist it is an error.
  */
-static Result DoCmdLog(int argc, char* argv[])
+static Result DoCmdLog(int argc, char *argv[])
 {
-	int				i;
-	const char*		arg;
-	const char*		contextName;
-	PmLogContext	context;
-	const int*		levelIntP;
-	PmLogErr		logErr;
-	const char*		msg;
-	int				defaultLevel;
+	int             i;
+	const char     *arg;
+	const char     *contextName;
+	PmLogContext    context;
+	const int      *levelIntP;
+	PmLogErr        logErr;
+	const char     *msg;
+	int             defaultLevel;
 
 	contextName = NULL;
 	context = NULL;
@@ -569,6 +591,7 @@ static Result DoCmdLog(int argc, char* argv[])
 	}
 
 	i = 1;
+
 	while (i < argc)
 	{
 		arg = argv[ i ];
@@ -578,22 +601,26 @@ static Result DoCmdLog(int argc, char* argv[])
 			contextName = arg;
 			contextName = PrvResolveContextNameAlias(contextName);
 			logErr = PmLogFindContext(contextName, &context);
+
 			if (logErr != kPmLogErr_None)
 			{
 				ErrPrint("Invalid context '%s'.\n", arg);
 				return RESULT_PARAM_ERR;
 			}
+
 			i++;
 		}
 		else if (levelIntP == NULL)
 		{
 			levelIntP = PmLogStringToLevel(arg);
+
 			if ((levelIntP == NULL) ||
-				(*levelIntP == -1))
+			        (*levelIntP == -1))
 			{
 				ErrPrint("Invalid level '%s'.\n", arg);
 				return RESULT_PARAM_ERR;
 			}
+
 			i++;
 		}
 		else if (msg == NULL)
@@ -627,10 +654,11 @@ static Result DoCmdLog(int argc, char* argv[])
 	}
 
 	logErr = PmLogPrint_(context, *levelIntP, "%s", msg);
+
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error logging: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		return RESULT_RUN_ERR;
 	}
 
@@ -650,13 +678,13 @@ static Result DoCmdLog(int argc, char* argv[])
 static Result DoCmdLogKV(int argc, char *argv[])
 {
 	int             paramIndex = 1;
-	char*           arg;
-	const char*     contextName;
+	char           *arg;
+	const char     *contextName;
 	PmLogContext    context;
-	const int*      levelIntP;
+	const int      *levelIntP;
 	PmLogErr        logErr;
-	const char*     msgID;
-	const char*     msg;
+	const char     *msgID;
+	const char     *msg;
 	char            kvPair[1024];
 	bool            isCheckedKV = false;
 
@@ -667,77 +695,103 @@ static Result DoCmdLogKV(int argc, char *argv[])
 	msg = NULL;
 	memset(kvPair, 0x00, sizeof(kvPair));
 
-	if (argc < 4 ) {
+	if (argc < 4)
+	{
 		ErrPrint("Minimum 4 parameters are expected. Please see help for more details.\n");
 		return RESULT_PARAM_ERR;
 	}
 
-	while (paramIndex < argc) {
+	while (paramIndex < argc)
+	{
 		arg = argv[ paramIndex ];
 
-		if (contextName == NULL) {
+		if (contextName == NULL)
+		{
 			contextName = arg;
 			contextName = PrvResolveContextNameAlias(contextName);
 			logErr = PmLogFindContext(contextName, &context);
-			if (logErr != kPmLogErr_None) {
+
+			if (logErr != kPmLogErr_None)
+			{
 				ErrPrint("Invalid context '%s'.\n", arg);
 				return RESULT_PARAM_ERR;
 			}
+
 			paramIndex++;
-		} else if (levelIntP == NULL) {
+		}
+		else if (levelIntP == NULL)
+		{
 			levelIntP = PmLogStringToLevel(arg);
+
 			if ((levelIntP == NULL) ||
-				(*levelIntP == -1)) {
+			        (*levelIntP == -1))
+			{
 				ErrPrint("Invalid level '%s'.\n", arg);
 				return RESULT_PARAM_ERR;
 			}
+
 			paramIndex++;
-		} else if (msgID == NULL && *levelIntP != kPmLogLevel_Debug) {
+		}
+		else if (msgID == NULL && *levelIntP != kPmLogLevel_Debug)
+		{
 			msgID = arg;
 			paramIndex++;
-		} else if (kvPair[0] == '\0' &&
-                   !isCheckedKV &&
-                   *levelIntP != kPmLogLevel_Debug) {
+		}
+		else if (kvPair[0] == '\0' &&
+		         !isCheckedKV &&
+		         *levelIntP != kPmLogLevel_Debug)
+		{
 			int   index = 0;
 			int   kvLength = 0;
 			bool  result = false;
 
 			isCheckedKV = true;
 
-			while(paramIndex < argc) {
+			while (paramIndex < argc)
+			{
 
-				if (paramIndex == argc - 1) { // No more key and value pair.
-					if (paramIndex == 4) { // free text only
+				if (paramIndex == argc - 1)   // No more key and value pair.
+				{
+					if (paramIndex == 4)   // free text only
+					{
 						snprintf(kvPair, sizeof(kvPair), "{}");
 					}
+
 					break;
 				}
 
-				if (arg) {
+				if (arg)
+				{
 					char *keyBuffer = NULL;
 					char *valueBuffer = NULL;
 
-					if (index == 0) {
+					if (index == 0)
+					{
 						strncat(kvPair, "{", 1);
 						index += 1;
 					}
 
-					if (2 > sscanf(arg, "%m[^=]=%m[^\t\n]", &keyBuffer, &valueBuffer)) {
+					if (2 > sscanf(arg, "%m[^=]=%m[^\t\n]", &keyBuffer, &valueBuffer))
+					{
 						ErrPrint("key and value pair is wrong : %s\n", arg);
 					}
 
-					else {
+					else
+					{
 						snprintf(kvPair + index, sizeof(kvPair) - index - 1,
-					         "\"%s\":%s", keyBuffer, valueBuffer);
+						         "\"%s\":%s", keyBuffer, valueBuffer);
 
 						kvLength = strlen(keyBuffer);
 						kvLength += 2; // add length for " "
 						kvLength += 1; // add length for :
 						kvLength += strlen(valueBuffer); // value
 
-						if (paramIndex == argc - 2) {
+						if (paramIndex == argc - 2)
+						{
 							strncat(kvPair, "}", 1);
-						} else {
+						}
+						else
+						{
 							strncat(kvPair, ",", 1);
 							kvLength += 1; // add length for ,
 							index += kvLength; // index of next key and value pair
@@ -745,48 +799,66 @@ static Result DoCmdLogKV(int argc, char *argv[])
 
 						result = true;
 					}
-					if(keyBuffer)
+
+					if (keyBuffer)
+					{
 						free(keyBuffer);
-					if(valueBuffer)
+					}
+
+					if (valueBuffer)
+					{
 						free(valueBuffer);
+					}
+
 					arg = argv[++paramIndex];
 
-					if (!result) {
+					if (!result)
+					{
 						return RESULT_PARAM_ERR;
 					}
 				} // validation if arg is exist
 			} // for loop for key and value parameter
+
 			kvPair[sizeof(kvPair) - 1] = '\0';
-		} else if (msg == NULL)	{
+		}
+		else if (msg == NULL)
+		{
 			msg = arg;
 			paramIndex++;
-		} else {
+		}
+		else
+		{
 			ErrPrint("Invalid parameter '%s'.\n", arg);
 			return RESULT_PARAM_ERR;
 		}
 	}
 
-	if (contextName == NULL) {
+	if (contextName == NULL)
+	{
 		ErrPrint("Context is not specified.\n");
 		return RESULT_PARAM_ERR;
 	}
 
-	if (levelIntP == NULL) {
+	if (levelIntP == NULL)
+	{
 		ErrPrint("Level is not specified.\n");
 		return RESULT_PARAM_ERR;
 	}
 
-	if (msgID == NULL && *levelIntP != kPmLogLevel_Debug) {
+	if (msgID == NULL && *levelIntP != kPmLogLevel_Debug)
+	{
 		ErrPrint("Message ID is not specified.\n");
 		return RESULT_PARAM_ERR;
 	}
 
 	logErr = PmLogString(context, *levelIntP, msgID,
-                         *levelIntP == kPmLogLevel_Debug ? NULL : kvPair,
-                         msg);
-	if (logErr != kPmLogErr_None) {
+	                     *levelIntP == kPmLogLevel_Debug ? NULL : kvPair,
+	                     msg);
+
+	if (logErr != kPmLogErr_None)
+	{
 		ErrPrint("Error logging: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		return RESULT_RUN_ERR;
 	}
 
@@ -799,17 +871,18 @@ static Result DoCmdLogKV(int argc, char *argv[])
  *
  * Write a kernel message.
  */
-static Result WriteKMsg(int priority, const char* msgStr)
+static Result WriteKMsg(int priority, const char *msgStr)
 {
-	const char* kKMsgPath = "/dev/kmsg";
+	const char *kKMsgPath = "/dev/kmsg";
 
-	FILE*	f;
-	int		err;
-	char	priorityStr[ 8 ];
-	int		n;
-	Result	result;
+	FILE   *f;
+	int     err;
+	char    priorityStr[ 8 ];
+	int     n;
+	Result  result;
 
 	f = fopen(kKMsgPath, "w");
+
 	if (f == NULL)
 	{
 		err = errno;
@@ -827,6 +900,7 @@ static Result WriteKMsg(int priority, const char* msgStr)
 	}
 
 	n = fprintf(f, "%s%s\n", priorityStr, msgStr);
+
 	if (n < 0)
 	{
 		err = errno;
@@ -851,20 +925,21 @@ static Result WriteKMsg(int priority, const char* msgStr)
  *
  * Test a call through printk.
  */
-static Result DoCmdKLog(int argc, char* argv[])
+static Result DoCmdKLog(int argc, char *argv[])
 {
-	int				i;
-	const char*		arg;
-	int				level;
-	const int*		levelIntP;
-	const char*		msg;
-	Result			result;
+	int             i;
+	const char     *arg;
+	int             level;
+	const int      *levelIntP;
+	const char     *msg;
+	Result          result;
 
 	level = kPmLogLevel_Notice;
 	levelIntP = NULL;
 	msg = NULL;
 
 	i = 1;
+
 	while (i < argc)
 	{
 		arg = argv[ i ];
@@ -874,6 +949,7 @@ static Result DoCmdKLog(int argc, char* argv[])
 			if (strcmp(arg, "-p") == 0)
 			{
 				i++;
+
 				if (i >= argc)
 				{
 					ErrPrint("Invalid parameter: -p requires value\n");
@@ -882,6 +958,7 @@ static Result DoCmdKLog(int argc, char* argv[])
 
 				arg = argv[ i ];
 				levelIntP = PmLogStringToLevel(arg);
+
 				if (levelIntP == NULL)
 				{
 					ErrPrint("Invalid level '%s'.\n", arg);
@@ -915,17 +992,17 @@ static Result DoCmdKLog(int argc, char* argv[])
 		return RESULT_PARAM_ERR;
 	}
 
-	#if 1
+#if 1
 	{
 		result = WriteKMsg(level, msg);
 	}
-	#else
+#else
 	{
-		n = klogctl(10, (char*) msg, strlen(msg));
+		n = klogctl(10, (char *) msg, strlen(msg));
 		ErrPrint("klogctl = %d\n", n);
 		result = RESULT_OK;
 	}
-	#endif
+#endif
 
 	return result;
 }
@@ -937,22 +1014,24 @@ static Result DoCmdKLog(int argc, char* argv[])
  */
 static Result DoCmdFlush()
 {
-	PmLogErr		logErr;
-	PmLogContext	context;
+	PmLogErr        logErr;
+	PmLogContext    context;
 
 	logErr = PmLogGetContext("pmlogctl", &context);
+
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error getting context PmLogCtl: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		return RESULT_RUN_ERR;
 	}
 
 	logErr = PmLogInfo(context, "FLUSH_BUFFER", 0, "Manually Flushing Buffers");
+
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error logging: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		return RESULT_RUN_ERR;
 	}
 
@@ -968,13 +1047,14 @@ static Result DoCmdFlush()
  * Issue the PmLogLib command that forces the global options to be
  * reloaded from /etc/PmLogContexts.conf.
  */
-static Result DoCmdReConf(int argc, char* argv[])
+static Result DoCmdReConf(int argc, char *argv[])
 {
-	int				i;
-	const char*		arg;
-	PmLogErr		logErr;
+	int             i;
+	const char     *arg;
+	PmLogErr        logErr;
 
 	i = 1;
+
 	while (i < argc)
 	{
 		arg = argv[ i ];
@@ -984,11 +1064,12 @@ static Result DoCmdReConf(int argc, char* argv[])
 	}
 
 	logErr = PmLogPrint_(kPmLogGlobalContext, kPmLogLevel_Emergency,
-		"!loglib loadconf");
+	                     "!loglib loadconf");
+
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error logging: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		return RESULT_RUN_ERR;
 	}
 
@@ -1005,17 +1086,17 @@ static Result DoCmdReConf(int argc, char* argv[])
  * If the level is not specified it is assigned a default.
  * If the context already exists it is an error.
  */
-static Result DoCmdDef(int argc, char* argv[])
+static Result DoCmdDef(int argc, char *argv[])
 {
 	const int kLevelNotSpecified = -999;
 
-	int				i;
-	const char*		arg;
-	const char*		contextName;
-	PmLogContext	context;
-	const int*		levelIntP;
-	int				level;
-	PmLogErr		logErr;
+	int             i;
+	const char     *arg;
+	const char     *contextName;
+	PmLogContext    context;
+	const int      *levelIntP;
+	int             level;
+	PmLogErr        logErr;
 
 	contextName = NULL;
 	context = NULL;
@@ -1023,6 +1104,7 @@ static Result DoCmdDef(int argc, char* argv[])
 	level = kLevelNotSpecified;
 
 	i = 1;
+
 	while (i < argc)
 	{
 		arg = argv[ i ];
@@ -1032,21 +1114,25 @@ static Result DoCmdDef(int argc, char* argv[])
 			contextName = arg;
 			contextName = PrvResolveContextNameAlias(contextName);
 			logErr = PmLogFindContext(contextName, &context);
+
 			if (logErr == kPmLogErr_None)
 			{
 				ErrPrint("Context '%s' is already defined.\n", contextName);
 				return RESULT_OK;
 			}
+
 			i++;
 		}
 		else if (levelIntP == NULL)
 		{
 			levelIntP = PmLogStringToLevel(arg);
+
 			if (levelIntP == NULL)
 			{
 				ErrPrint("Invalid level '%s'.\n", arg);
 				return RESULT_PARAM_ERR;
 			}
+
 			level = *levelIntP;
 			i++;
 		}
@@ -1064,20 +1150,22 @@ static Result DoCmdDef(int argc, char* argv[])
 	}
 
 	logErr = PmLogGetContext(contextName, &context);
+
 	if (logErr != kPmLogErr_None)
 	{
 		ErrPrint("Error defining context: 0x%08X (%s)\n", logErr,
-			PmLogGetErrDbgString(logErr));
+		         PmLogGetErrDbgString(logErr));
 		return RESULT_RUN_ERR;
 	}
 
 	if (level != kLevelNotSpecified)
 	{
 		logErr = PmLogSetContextLevel(context, level);
+
 		if (logErr != kPmLogErr_None)
 		{
 			ErrPrint("Error setting context log level: 0x%08X (%s)\n", logErr,
-				PmLogGetErrDbgString(logErr));
+			         PmLogGetErrDbgString(logErr));
 			return RESULT_RUN_ERR;
 		}
 	}
@@ -1093,7 +1181,7 @@ static Result DoCmdDef(int argc, char* argv[])
  */
 static void ShowUsage(void)
 {
-	int	level;
+	int level;
 
 	ErrPrint("PmLogCtl COMMAND [PARAM...]\n");
 	ErrPrint("PmLogCtl -s COMMAND [PARAM...] # disable stdout messages\n");
@@ -1118,6 +1206,7 @@ static void ShowUsage(void)
 	ErrPrint("\n");
 
 	ErrPrint("Levels:\n");
+
 	for (level = -1 /* kPmLogLevel_None */; level <= 7; level++)
 	{
 		ErrPrint("  %-10s  # %d\n", PmLogLevelToString(level), level);
@@ -1128,9 +1217,9 @@ static void ShowUsage(void)
 /**
  * @brief main
  */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-	Result	result;
+	Result  result;
 	char    *cmd;
 	char    **cmd_index;
 	int     modified_argc = argc;
@@ -1149,11 +1238,15 @@ int main(int argc, char* argv[])
 		if (strncmp(cmd, "-s", 2) == 0)
 		{
 			flag_silence = true;
-			if (argv[2]) { // parameter next "-s" option
+
+			if (argv[2])   // parameter next "-s" option
+			{
 				cmd = argv[2];
 				cmd_index = &argv[2];
 				modified_argc = argc - 2;
-			} else {
+			}
+			else
+			{
 				ErrPrint("No command specified.\n");
 				result = RESULT_PARAM_ERR;
 				break;
@@ -1202,7 +1295,7 @@ int main(int argc, char* argv[])
 			result = DoCmdFlush();
 		}
 		else if ((strcmp(cmd, "help") == 0) ||
-			(strcmp(cmd, "-help") == 0))
+		         (strcmp(cmd, "-help") == 0))
 		{
 			ShowUsage();
 			result = RESULT_HELP;

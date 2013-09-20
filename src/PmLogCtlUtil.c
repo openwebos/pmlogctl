@@ -47,9 +47,9 @@
  * Easy to use wrapper for strcpy to make it safe against buffer
  * overflows and to report any truncations.
  */
-void mystrcpy(char* dst, size_t dstSize, const char* src)
+void mystrcpy(char *dst, size_t dstSize, const char *src)
 {
-	size_t	srcLen;
+	size_t  srcLen;
 
 	if (dst == NULL)
 	{
@@ -72,6 +72,7 @@ void mystrcpy(char* dst, size_t dstSize, const char* src)
 	}
 
 	srcLen = strlen(src);
+
 	if (srcLen >= dstSize)
 	{
 		ErrPrint("mystrcpy buffer overflow on '%s'\n", src);
@@ -89,11 +90,11 @@ void mystrcpy(char* dst, size_t dstSize, const char* src)
  * Easy to use wrapper for strcat to make it safe against buffer
  * overflows and to report any truncations.
  */
-void mystrcat(char* dst, size_t dstSize, const char* src)
+void mystrcat(char *dst, size_t dstSize, const char *src)
 {
-	size_t	dstLen;
-	size_t	srcLen;
-	size_t	maxLen;
+	size_t  dstLen;
+	size_t  srcLen;
+	size_t  maxLen;
 
 	if (dst == NULL)
 	{
@@ -108,6 +109,7 @@ void mystrcat(char* dst, size_t dstSize, const char* src)
 	}
 
 	dstLen = strlen(dst);
+
 	if (dstLen >= dstSize)
 	{
 		ErrPrint("mystrcat invalid dst len\n");
@@ -121,6 +123,7 @@ void mystrcat(char* dst, size_t dstSize, const char* src)
 	}
 
 	srcLen = strlen(src);
+
 	if (srcLen < 1)
 	{
 		/* empty string, do nothing */
@@ -149,10 +152,10 @@ void mystrcat(char* dst, size_t dstSize, const char* src)
  * Easy to use wrapper for sprintf to make it safe against buffer
  * overflows and to report any truncations.
  */
-void mysprintf(char* dst, size_t dstSize, const char* fmt, ...)
+void mysprintf(char *dst, size_t dstSize, const char *fmt, ...)
 {
-	va_list 		args;
-	int				n;
+	va_list         args;
+	int             n;
 
 	if (dst == NULL)
 	{
@@ -177,6 +180,7 @@ void mysprintf(char* dst, size_t dstSize, const char* fmt, ...)
 	va_start(args, fmt);
 
 	n = vsnprintf(dst, dstSize, fmt, args);
+
 	if (n < 0)
 	{
 		ErrPrint("mysprintf error\n");
@@ -198,9 +202,9 @@ void mysprintf(char* dst, size_t dstSize, const char* fmt, ...)
  * Look up the string label for a given integer value from the given
  * mapping table.  Return NULL if not found.
  */
-const char* PrvGetIntLabel(const IntLabel* labels, int n)
+const char *PrvGetIntLabel(const IntLabel *labels, int n)
 {
-	const IntLabel* p;
+	const IntLabel *p;
 
 	for (p = labels; p->s != NULL; p++)
 	{
@@ -220,9 +224,9 @@ const char* PrvGetIntLabel(const IntLabel* labels, int n)
  * Look up the integer value matching a given string label from the
  * given mapping table. Return NULL if not found.
  */
-const int* PrvLabelToInt(const IntLabel* labels, const char* s)
+const int *PrvLabelToInt(const IntLabel *labels, const char *s)
 {
-	const IntLabel* p;
+	const IntLabel *p;
 
 	for (p = labels; p->s != NULL; p++)
 	{

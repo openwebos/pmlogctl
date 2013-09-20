@@ -55,40 +55,40 @@
 
 
 /* arbitrary maximum name length, should match PmLogLib */
-#define PMLOG_CONTEXT_MAX_NAME_LENGTH	31
+#define PMLOG_CONTEXT_MAX_NAME_LENGTH   31
 
 /* arbitrary maximum name length */
-#define PMLOG_PROGRAM_MAX_NAME_LENGTH	31
+#define PMLOG_PROGRAM_MAX_NAME_LENGTH   31
 
 /* arbitrary maximum */
-#define PMLOGVIEW_MAX_LOG_FILES		16
+#define PMLOGVIEW_MAX_LOG_FILES     16
 
 /* arbitrary maximum */
-#define PMLOGVIEW_MAX_LOG_SEGMENTS	(1 + 10)
+#define PMLOGVIEW_MAX_LOG_SEGMENTS  (1 + 10)
 
 
 typedef struct
 {
-	int			numLogs;
-	const char*	logFilePaths[ PMLOGVIEW_MAX_LOG_FILES ];
+	int         numLogs;
+	const char *logFilePaths[ PMLOGVIEW_MAX_LOG_FILES ];
 }
 ViewConfig_t;
 
 
 typedef struct
 {
-	const char*	basePath;
-	int			numSegments;
-	int			nextSegmentIndex;
-	FILE*		segmentFile;
-	int			segmentLineNum;
+	const char *basePath;
+	int         numSegments;
+	int         nextSegmentIndex;
+	FILE       *segmentFile;
+	int         segmentLineNum;
 }
 ViewLog_t;
 
 
 typedef struct
 {
-	ViewLog_t	viewLogs[ PMLOGVIEW_MAX_LOG_FILES ];
+	ViewLog_t   viewLogs[ PMLOGVIEW_MAX_LOG_FILES ];
 }
 ViewLogs_t;
 
@@ -96,20 +96,28 @@ ViewLogs_t;
 /**
  * @brief PrvCmpTimeVals
  */
-static int PrvCmpTimeVals(const struct timeval* tv1P,
-	const struct timeval* tv2P)
+static int PrvCmpTimeVals(const struct timeval *tv1P,
+                          const struct timeval *tv2P)
 {
 	if (tv1P->tv_sec < tv2P->tv_sec)
+	{
 		return -1;
+	}
 
 	if (tv1P->tv_sec > tv2P->tv_sec)
+	{
 		return 1;
+	}
 
 	if (tv1P->tv_usec < tv2P->tv_usec)
+	{
 		return -1;
+	}
 
 	if (tv1P->tv_usec > tv2P->tv_usec)
+	{
 		return 1;
+	}
 
 	return 0;
 }
@@ -120,7 +128,7 @@ static int PrvCmpTimeVals(const struct timeval* tv1P,
  *
  * Month labels per RFC 3164
  */
-static const char* kMonthNames[ 12 ] =
+static const char *kMonthNames[ 12 ] =
 {
 	/*  0 */ "Jan",
 	/*  1 */ "Feb",
@@ -140,9 +148,9 @@ static const char* kMonthNames[ 12 ] =
 /**
  * @brief EvalMonthName
  */
-static int EvalMonthName(const char* s)
+static int EvalMonthName(const char *s)
 {
-	int	i;
+	int i;
 
 	for (i = 0; i < 12; i++)
 	{
@@ -162,11 +170,11 @@ static int EvalMonthName(const char* s)
  * Given a decimal integer represented as character sequence of
  * ' '* ['0'..'9']+, return the integer value.
  */
-static int EvalDecStr(const char* s, int numChars)
+static int EvalDecStr(const char *s, int numChars)
 {
-	int		n;
-	int		i;
-	char	c;
+	int     n;
+	int     i;
+	char    c;
 
 	n = 0;
 
@@ -196,13 +204,13 @@ static int EvalDecStr(const char* s, int numChars)
  * after the date-time stamp prefix in *msgPP.
  * @return true if successful else false.
  */
-static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
-	const char** msgPP)
+static bool ParseTimeStamp(const char *msg, struct timeval *tvP,
+                           const char **msgPP)
 {
-	size_t			msgLen;
-	size_t			tsLen;
-	time_t			nowT;
-	struct tm		nowLocalTm;
+	size_t          msgLen;
+	size_t          tsLen;
+	time_t          nowT;
+	struct tm       nowLocalTm;
 
 	*msgPP = msg;
 
@@ -225,24 +233,24 @@ static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
 	 *  = #= #=##=##=
 	 */
 	if ((msgLen >= 16) &&
-		isalpha(msg[ 0 ]) &&
-		isalpha(msg[ 1 ]) &&
-		isalpha(msg[ 2 ]) &&
-		(msg[ 3 ] == ' ') &&
-		((msg[ 4 ] == ' ') || isdigit(msg[ 4 ])) &&
-		isdigit(msg[ 5 ]) &&
-		(msg[ 6 ] == ' ') &&
-		((msg[ 7 ] == ' ') || isdigit(msg[ 7 ])) &&
-		isdigit(msg[ 8 ]) &&
-		(msg[ 9 ] == ':') &&
-		isdigit(msg[ 10 ]) &&
-		isdigit(msg[ 11 ]) &&
-		(msg[ 12 ] == ':') &&
-		isdigit(msg[ 13 ]) &&
-		isdigit(msg[ 14 ]) &&
-		(msg[ 15 ] == ' '))
+	        isalpha(msg[ 0 ]) &&
+	        isalpha(msg[ 1 ]) &&
+	        isalpha(msg[ 2 ]) &&
+	        (msg[ 3 ] == ' ') &&
+	        ((msg[ 4 ] == ' ') || isdigit(msg[ 4 ])) &&
+	        isdigit(msg[ 5 ]) &&
+	        (msg[ 6 ] == ' ') &&
+	        ((msg[ 7 ] == ' ') || isdigit(msg[ 7 ])) &&
+	        isdigit(msg[ 8 ]) &&
+	        (msg[ 9 ] == ':') &&
+	        isdigit(msg[ 10 ]) &&
+	        isdigit(msg[ 11 ]) &&
+	        (msg[ 12 ] == ':') &&
+	        isdigit(msg[ 13 ]) &&
+	        isdigit(msg[ 14 ]) &&
+	        (msg[ 15 ] == ' '))
 	{
-		struct tm		msgLocalTm;
+		struct tm       msgLocalTm;
 
 		tsLen = 16;
 
@@ -253,19 +261,20 @@ static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
 
 		memset(&msgLocalTm, 0, sizeof(msgLocalTm));
 
-		msgLocalTm.tm_year	= nowLocalTm.tm_year;
+		msgLocalTm.tm_year  = nowLocalTm.tm_year;
 
-		msgLocalTm.tm_mon	= EvalMonthName(msg);
+		msgLocalTm.tm_mon   = EvalMonthName(msg);
+
 		if (msgLocalTm.tm_mon < 0)
 		{
 			/* the month name lookup failed */
 			return false;
 		}
 
-		msgLocalTm.tm_mday	= EvalDecStr(msg + 4, 2);
-		msgLocalTm.tm_hour 	= EvalDecStr(msg + 7, 2);
-		msgLocalTm.tm_min  	= EvalDecStr(msg + 10, 2);
-		msgLocalTm.tm_sec 	= EvalDecStr(msg + 13, 2);
+		msgLocalTm.tm_mday  = EvalDecStr(msg + 4, 2);
+		msgLocalTm.tm_hour  = EvalDecStr(msg + 7, 2);
+		msgLocalTm.tm_min   = EvalDecStr(msg + 10, 2);
+		msgLocalTm.tm_sec   = EvalDecStr(msg + 13, 2);
 
 		/* mktime takes a local time */
 		tvP->tv_sec = mktime(&msgLocalTm);
@@ -291,30 +300,30 @@ static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
 	 * "1985-04-12T23:20:50.123Z "
 	 */
 	if ((msgLen >= 21) &&
-		isdigit(msg[ 0 ]) &&
-		isdigit(msg[ 1 ]) &&
-		isdigit(msg[ 2 ]) &&
-		isdigit(msg[ 3 ]) &&
-		(msg[ 4 ] == '-') &&
-		isdigit(msg[ 5 ]) &&
-		isdigit(msg[ 6 ]) &&
-		(msg[ 7 ] == '-') &&
-		isdigit(msg[ 8 ]) &&
-		isdigit(msg[ 9 ]) &&
-		(msg[ 10 ] == 'T') &&
-		isdigit(msg[ 11 ]) &&
-		isdigit(msg[ 12 ]) &&
-		(msg[ 13 ] == ':') &&
-		isdigit(msg[ 14 ]) &&
-		isdigit(msg[ 15 ]) &&
-		(msg[ 16 ] == ':') &&
-		isdigit(msg[ 17 ]) &&
-		isdigit(msg[ 18 ]) &&
-		((msg[ 19 ] == 'Z') || (msg[ 19 ] == '.')))
+	        isdigit(msg[ 0 ]) &&
+	        isdigit(msg[ 1 ]) &&
+	        isdigit(msg[ 2 ]) &&
+	        isdigit(msg[ 3 ]) &&
+	        (msg[ 4 ] == '-') &&
+	        isdigit(msg[ 5 ]) &&
+	        isdigit(msg[ 6 ]) &&
+	        (msg[ 7 ] == '-') &&
+	        isdigit(msg[ 8 ]) &&
+	        isdigit(msg[ 9 ]) &&
+	        (msg[ 10 ] == 'T') &&
+	        isdigit(msg[ 11 ]) &&
+	        isdigit(msg[ 12 ]) &&
+	        (msg[ 13 ] == ':') &&
+	        isdigit(msg[ 14 ]) &&
+	        isdigit(msg[ 15 ]) &&
+	        (msg[ 16 ] == ':') &&
+	        isdigit(msg[ 17 ]) &&
+	        isdigit(msg[ 18 ]) &&
+	        ((msg[ 19 ] == 'Z') || (msg[ 19 ] == '.')))
 	{
-		struct tm		msgGmTm;
-		size_t			fracSecLen;
-		int				usec;
+		struct tm       msgGmTm;
+		size_t          fracSecLen;
+		int             usec;
 
 		/* In this format, the formatted time is UTC */
 
@@ -331,6 +340,7 @@ static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
 		else /* (msg[ 19 ] == '.') */
 		{
 			fracSecLen = 0;
+
 			while (isdigit(msg[ 20 + fracSecLen ]))
 			{
 				fracSecLen++;
@@ -352,18 +362,18 @@ static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
 			}
 
 			tsLen = 20 + fracSecLen + 2;
-			usec	= EvalDecStr(msg + 20, fracSecLen);
+			usec    = EvalDecStr(msg + 20, fracSecLen);
 		}
 
 		memset(&msgGmTm, 0, sizeof(msgGmTm));
 
-		msgGmTm.tm_year	= EvalDecStr(msg, 4) - 1900;
-		msgGmTm.tm_mon	= EvalDecStr(msg + 5, 2) - 1;
-		msgGmTm.tm_mday	= EvalDecStr(msg + 8, 2);
+		msgGmTm.tm_year = EvalDecStr(msg, 4) - 1900;
+		msgGmTm.tm_mon  = EvalDecStr(msg + 5, 2) - 1;
+		msgGmTm.tm_mday = EvalDecStr(msg + 8, 2);
 
 		msgGmTm.tm_hour = EvalDecStr(msg + 11, 2);
 		msgGmTm.tm_min  = EvalDecStr(msg + 14, 2);
-		msgGmTm.tm_sec 	= EvalDecStr(msg + 17, 2);
+		msgGmTm.tm_sec  = EvalDecStr(msg + 17, 2);
 
 		/* mktime takes a local time, so we have to offset the result */
 		tvP->tv_sec = mktime(&msgGmTm) + nowLocalTm.tm_gmtoff;
@@ -384,16 +394,17 @@ static bool ParseTimeStamp(const char* msg, struct timeval* tvP,
  * @return If this is matched, return the address of the character
  *         past the ' ', else return NULL.
  */
-static const char* ParseMsgHost(const char* msg, char* hostName,
-	size_t hostNameBuffSize)
+static const char *ParseMsgHost(const char *msg, char *hostName,
+                                size_t hostNameBuffSize)
 {
-	const char* s;
-	size_t		i;
+	const char *s;
+	size_t      i;
 
 	s = msg;
 
 	/* span characters that are allowed for host names */
 	i = 0;
+
 	while (isalnum(*s) || (*s == '.') || (*s == '_') || (*s == '-'))
 	{
 		if (i + 1 < hostNameBuffSize)
@@ -401,6 +412,7 @@ static const char* ParseMsgHost(const char* msg, char* hostName,
 			hostName[ i ] = *s;
 			i++;
 		}
+
 		s++;
 	}
 
@@ -415,6 +427,7 @@ static const char* ParseMsgHost(const char* msg, char* hostName,
 	{
 		return NULL;
 	}
+
 	s++;
 
 	return s;
@@ -425,25 +438,26 @@ static const char* ParseMsgHost(const char* msg, char* hostName,
  * @brief ParseMsgPriority
  *
  * The message should be of the form:
- * 	<facil> '.' <level' ' '
+ *  <facil> '.' <level' ' '
  *
  * @return If this is matched, return the address of the character
  *         past the ' ', else return NULL.
  */
-static const char* ParseMsgPriority(const char* msg, int* priP,
-	char* errMsg, size_t errMsgBuffSize)
+static const char *ParseMsgPriority(const char *msg, int *priP,
+                                    char *errMsg, size_t errMsgBuffSize)
 {
-	const char*	s;
-	char		str[ 20 ];
-	int			i;
-	int			fac;
-	int			lvl;
+	const char *s;
+	char        str[ 20 ];
+	int         i;
+	int         fac;
+	int         lvl;
 
 	errMsg[ 0 ] = 0;
 
 	s = msg;
 
 	i = 0;
+
 	while (isalnum(s[ i ]))
 	{
 		i++;
@@ -468,9 +482,11 @@ static const char* ParseMsgPriority(const char* msg, int* priP,
 	{
 		return NULL;
 	}
+
 	s++;
 
 	i = 0;
+
 	while (isalnum(s[ i ]))
 	{
 		i++;
@@ -495,6 +511,7 @@ static const char* ParseMsgPriority(const char* msg, int* priP,
 	{
 		return NULL;
 	}
+
 	s++;
 
 	*priP = fac | lvl;
@@ -506,17 +523,17 @@ static const char* ParseMsgPriority(const char* msg, int* priP,
  * @brief ParseMsgProgram
  *
  * If the message came from a syslog call, it should be of the form:
- * 	<progname> [ '[' <pid> ']' ] ':' ' '
+ *  <progname> [ '[' <pid> ']' ] ':' ' '
  *
  * If this is matched, return the address of the character
  * past the ' ', else return NULL.
  */
-static const char* ParseMsgProgram(const char* msg, char* programName,
-	size_t programNameBuffSize, int* programPidP)
+static const char *ParseMsgProgram(const char *msg, char *programName,
+                                   size_t programNameBuffSize, int *programPidP)
 {
-	const char* s;
-	size_t		i;
-	int			pid;
+	const char *s;
+	size_t      i;
+	int         pid;
 
 	s = msg;
 
@@ -524,6 +541,7 @@ static const char* ParseMsgProgram(const char* msg, char* programName,
 
 	/* span characters not including '[', ':', and whitespace */
 	i = 0;
+
 	while ((*s != 0) && (*s != '[') && (*s != ':') && (!isspace(*s)))
 	{
 		if (i + 1 < programNameBuffSize)
@@ -531,6 +549,7 @@ static const char* ParseMsgProgram(const char* msg, char* programName,
 			programName[ i ] = *s;
 			i++;
 		}
+
 		s++;
 	}
 
@@ -546,6 +565,7 @@ static const char* ParseMsgProgram(const char* msg, char* programName,
 		s++;
 
 		pid = 0;
+
 		while (isdigit(*s))
 		{
 			pid = pid * 10 + ((*s) - '0');
@@ -556,6 +576,7 @@ static const char* ParseMsgProgram(const char* msg, char* programName,
 		{
 			return NULL;
 		}
+
 		s++;
 
 		*programPidP = pid;
@@ -565,12 +586,14 @@ static const char* ParseMsgProgram(const char* msg, char* programName,
 	{
 		return NULL;
 	}
+
 	s++;
 
 	if (*s != ' ')
 	{
 		return NULL;
 	}
+
 	s++;
 
 	return s;
@@ -582,16 +605,16 @@ static const char* ParseMsgProgram(const char* msg, char* programName,
  *
  * If the message came from a PmLogLib call that specified a context,
  * it should be of the form:
- * 	'{' <contextName '}' ':' ' '
+ *  '{' <contextName '}' ':' ' '
  *
  * If this is matched, return the address of the character
  * past the ' ', else return NULL.
  */
-static const char* ParseMsgContext(const char* msg, char* contextName,
-	size_t contextNameBuffSize)
+static const char *ParseMsgContext(const char *msg, char *contextName,
+                                   size_t contextNameBuffSize)
 {
-	const char* s;
-	size_t		i;
+	const char *s;
+	size_t      i;
 
 	s = msg;
 
@@ -599,6 +622,7 @@ static const char* ParseMsgContext(const char* msg, char* contextName,
 	{
 		return NULL;
 	}
+
 	s++;
 
 	/*
@@ -606,16 +630,19 @@ static const char* ParseMsgContext(const char* msg, char* contextName,
 	 * see PmLogLib for definition
 	 */
 	i = 0;
+
 	while ((*s != 0) && (*s != '}') && (!isspace(*s)) &&
-		(isalnum(*s) || (*s == '.') || (*s == '_')))
+	        (isalnum(*s) || (*s == '.') || (*s == '_')))
 	{
 		if (i + 1 < contextNameBuffSize)
 		{
 			contextName[ i ] = *s;
 			i++;
 		}
+
 		s++;
 	}
+
 	contextName[ i ] = 0;
 
 	if (i == 0)
@@ -627,18 +654,21 @@ static const char* ParseMsgContext(const char* msg, char* contextName,
 	{
 		return NULL;
 	}
+
 	s++;
 
 	if (*s != ':')
 	{
 		return NULL;
 	}
+
 	s++;
 
 	if (*s != ' ')
 	{
 		return NULL;
 	}
+
 	s++;
 
 	return s;
@@ -647,13 +677,13 @@ static const char* ParseMsgContext(const char* msg, char* contextName,
 
 typedef struct
 {
-	struct timeval	tv;
-	char			hostName[ MAXHOSTNAMELEN + 1 ];
-	int				pri;
-	char			programName[ PMLOG_PROGRAM_MAX_NAME_LENGTH + 1 ];
-	int				programPid;
-	char			contextName[ PMLOG_CONTEXT_MAX_NAME_LENGTH + 1 ];
-	char			msg[ 2048 ];
+	struct timeval  tv;
+	char            hostName[ MAXHOSTNAMELEN + 1 ];
+	int             pri;
+	char            programName[ PMLOG_PROGRAM_MAX_NAME_LENGTH + 1 ];
+	int             programPid;
+	char            contextName[ PMLOG_CONTEXT_MAX_NAME_LENGTH + 1 ];
+	char            msg[ 2048 ];
 }
 ParsedMsg;
 
@@ -661,20 +691,20 @@ ParsedMsg;
 /**
  * @brief PrvSameParsedMsg
  */
-static bool PrvSameParsedMsg(const ParsedMsg* msg1P, const ParsedMsg* msg2P)
+static bool PrvSameParsedMsg(const ParsedMsg *msg1P, const ParsedMsg *msg2P)
 {
 	/*
 	 * note: time (tv) has already been compared so ignore that
 	 * compare msg first, as that's most likely to differ
 	 */
 	return
-		(strcmp(msg1P->msg, msg2P->msg) == 0)					&&
+	    (strcmp(msg1P->msg, msg2P->msg) == 0)                   &&
 
-		(strcmp(msg1P->hostName, msg2P->hostName) == 0)			&&
-		(msg1P->pri == msg2P->pri)								&&
-		(strcmp(msg1P->programName, msg2P->programName) == 0)	&&
-		(msg1P->programPid == msg2P->programPid)				&&
-		(strcmp(msg1P->contextName, msg2P->contextName) == 0);
+	    (strcmp(msg1P->hostName, msg2P->hostName) == 0)         &&
+	    (msg1P->pri == msg2P->pri)                              &&
+	    (strcmp(msg1P->programName, msg2P->programName) == 0)   &&
+	    (msg1P->programPid == msg2P->programPid)                &&
+	    (strcmp(msg1P->contextName, msg2P->contextName) == 0);
 }
 
 
@@ -685,26 +715,27 @@ static bool PrvSameParsedMsg(const ParsedMsg* msg1P, const ParsedMsg* msg2P)
  *
  * E.g.
  * "2007-12-01T01:03:09Z joplin user.debug TelephonyInterfaceLayer: \
- * 	{TIL.HDLR}: endSession"
+ *  {TIL.HDLR}: endSession"
  */
-static bool ParseLogLine(const char* msg, ParsedMsg* msgP,
-	char* errMsg, size_t errMsgBuffSize)
+static bool ParseLogLine(const char *msg, ParsedMsg *msgP,
+                         char *errMsg, size_t errMsgBuffSize)
 {
-	const char*		s;
-	const char*		s2;
+	const char     *s;
+	const char     *s2;
 
-	msgP->tv.tv_sec			= 0;
-	msgP->tv.tv_usec		= 0;
-	msgP->hostName[ 0 ]		= 0;
-	msgP->pri				= 0;
-	msgP->programName[ 0 ]	= 0;
-	msgP->programPid		= 0;
-	msgP->contextName[ 0 ]	= 0;
-	msgP->msg[ 0 ]			= 0;
+	msgP->tv.tv_sec         = 0;
+	msgP->tv.tv_usec        = 0;
+	msgP->hostName[ 0 ]     = 0;
+	msgP->pri               = 0;
+	msgP->programName[ 0 ]  = 0;
+	msgP->programPid        = 0;
+	msgP->contextName[ 0 ]  = 0;
+	msgP->msg[ 0 ]          = 0;
 
 	errMsg[ 0 ] = 0;
 
 	s = msg;
+
 	if (!ParseTimeStamp(s, &msgP->tv, &s))
 	{
 		mystrcpy(errMsg, errMsgBuffSize, "Failed to parse timestamp");
@@ -712,23 +743,28 @@ static bool ParseLogLine(const char* msg, ParsedMsg* msgP,
 	}
 
 	s2 = ParseMsgHost(s, msgP->hostName, sizeof(msgP->hostName));
+
 	if (s2 == NULL)
 	{
 		mystrcpy(errMsg, errMsgBuffSize, "Failed to parse hostname");
 		return false;
 	}
+
 	s = s2;
 
 	s2 = ParseMsgPriority(s, &msgP->pri, errMsg, errMsgBuffSize);
+
 	if (s2 == NULL)
 	{
 		mystrcpy(errMsg, errMsgBuffSize, "Failed to parse priority");
 		return false;
 	}
+
 	s = s2;
 
 	s2 = ParseMsgProgram(s, msgP->programName, sizeof(msgP->programName),
-		&msgP->programPid);
+	                     &msgP->programPid);
+
 	if (s2 == NULL)
 	{
 		/*
@@ -744,6 +780,7 @@ static bool ParseLogLine(const char* msg, ParsedMsg* msgP,
 	}
 
 	s2 = ParseMsgContext(s, msgP->contextName, sizeof(msgP->contextName));
+
 	if (s2 == NULL)
 	{
 		msgP->contextName[ 0 ] = 0;
@@ -761,9 +798,9 @@ static bool ParseLogLine(const char* msg, ParsedMsg* msgP,
 
 typedef struct
 {
-	bool	useFullTimeStamps;
-	int		timeStampFracSecDigits;
-	bool	showHostName;
+	bool    useFullTimeStamps;
+	int     timeStampFracSecDigits;
+	bool    showHostName;
 }
 ViewFormat_t;
 
@@ -771,22 +808,23 @@ ViewFormat_t;
 /**
  * @brief FormatViewTime
  */
-static void FormatViewTime(char* buff, size_t buffSize,
-	const ViewFormat_t* formatP, const ParsedMsg* parsedMsgP)
+static void FormatViewTime(char *buff, size_t buffSize,
+                           const ViewFormat_t *formatP, const ParsedMsg *parsedMsgP)
 {
-	struct timeval	nowTv;
-	time_t			now;
-	struct tm		nowTm;
-	char			fracSecStr[ 16 ];
+	struct timeval  nowTv;
+	time_t          now;
+	struct tm       nowTm;
+	char            fracSecStr[ 16 ];
 
 	nowTv = parsedMsgP->tv;
 	now = nowTv.tv_sec;
 
 	fracSecStr[ 0 ] = 0;
+
 	if (formatP->timeStampFracSecDigits > 0)
 	{
 		mysprintf(fracSecStr, sizeof(fracSecStr),
-			".%06ld", nowTv.tv_usec);
+		          ".%06ld", nowTv.tv_usec);
 		fracSecStr[ 1 + formatP->timeStampFracSecDigits ] = 0;
 	}
 
@@ -801,9 +839,9 @@ static void FormatViewTime(char* buff, size_t buffSize,
 		(void) gmtime_r(&now, &nowTm);
 
 		mysprintf(buff, buffSize,
-			"%04d-%02d-%02dT%02d:%02d:%02d%sZ",
-			1900 + nowTm.tm_year, 1 + nowTm.tm_mon,	nowTm.tm_mday,
-			nowTm.tm_hour, nowTm.tm_min, nowTm.tm_sec, fracSecStr);
+		          "%04d-%02d-%02dT%02d:%02d:%02d%sZ",
+		          1900 + nowTm.tm_year, 1 + nowTm.tm_mon, nowTm.tm_mday,
+		          nowTm.tm_hour, nowTm.tm_min, nowTm.tm_sec, fracSecStr);
 	}
 	else
 	{
@@ -830,10 +868,10 @@ static void FormatViewTime(char* buff, size_t buffSize,
 /**
  * @brief FormatPri
  */
-static void FormatPri(int pri, char* str, size_t size)
+static void FormatPri(int pri, char *str, size_t size)
 {
-	const char* facStr;
-	const char* lvlStr;
+	const char *facStr;
+	const char *lvlStr;
 
 	facStr = GetFacilityStr(pri & LOG_FACMASK);
 	lvlStr = GetLevelStr(pri & LOG_PRIMASK);
@@ -852,10 +890,10 @@ static void FormatPri(int pri, char* str, size_t size)
 /**
  * @brief FormatView
  */
-static void FormatView(char* buff, size_t buffSize,
-	const ViewFormat_t* formatP, const ParsedMsg* parsedMsgP)
+static void FormatView(char *buff, size_t buffSize,
+                       const ViewFormat_t *formatP, const ParsedMsg *parsedMsgP)
 {
-	char	str[ 256 ];
+	char    str[ 256 ];
 
 	buff[ 0 ] = 0;
 
@@ -876,11 +914,13 @@ static void FormatView(char* buff, size_t buffSize,
 	if (parsedMsgP->programName[ 0 ])
 	{
 		mystrcat(buff, buffSize, parsedMsgP->programName);
+
 		if (parsedMsgP->programPid != 0)
 		{
 			mysprintf(str, sizeof(str), "[%d]", parsedMsgP->programPid);
 			mystrcat(buff, buffSize, str);
 		}
+
 		mystrcat(buff, buffSize, ": ");
 	}
 
@@ -899,13 +939,13 @@ static void FormatView(char* buff, size_t buffSize,
  * @brief MakeLogFilePath
  *
  * Given that the log file is rotated using the naming scheme:
- * 	<filename>		// current log	= segment index 0
- *  <filename>.0	// old log		= segment index 1
- *  <filename>.1	// older log	= segment index 2
+ *  <filename>      // current log  = segment index 0
+ *  <filename>.0    // old log      = segment index 1
+ *  <filename>.1    // older log    = segment index 2
  *  ...
  */
-static void MakeLogFilePath(char* path, size_t pathSize,
-	const char* basePath, int segmentIndex)
+static void MakeLogFilePath(char *path, size_t pathSize,
+                            const char *basePath, int segmentIndex)
 {
 	if (segmentIndex == 0)
 	{
@@ -922,26 +962,27 @@ static void MakeLogFilePath(char* path, size_t pathSize,
  * @brief GetLogFileNumSegments
  *
  * Given that the log file is rotated using the naming scheme:
- * 	<filename>		// current log
- *  <filename>.0	// old log
- *  <filename>.1	// older log
+ *  <filename>      // current log
+ *  <filename>.0    // old log
+ *  <filename>.1    // older log
  *  ...
  * Return how many segments are there.
  */
-static void GetLogFileNumSegments(const char* logFilePath, int* numSegmentsP)
+static void GetLogFileNumSegments(const char *logFilePath, int *numSegmentsP)
 {
-	char		segmentPath[ PATH_MAX ];
-	int			segmentIndex;
-	struct stat	statBuf;
-	int			result;
+	char        segmentPath[ PATH_MAX ];
+	int         segmentIndex;
+	struct stat statBuf;
+	int         result;
 
 	for (segmentIndex = 0; segmentIndex < PMLOGVIEW_MAX_LOG_SEGMENTS;
-		segmentIndex++)
+	        segmentIndex++)
 	{
 		MakeLogFilePath(segmentPath, sizeof(segmentPath), logFilePath,
-			segmentIndex);
+		                segmentIndex);
 		memset(&statBuf, 0, sizeof(statBuf));
 		result = stat(segmentPath, &statBuf);
+
 		if (result < 0)
 		{
 			break;
@@ -958,10 +999,10 @@ static void GetLogFileNumSegments(const char* logFilePath, int* numSegmentsP)
  * Read the next line from the logical log file into 'buff'.
  * @return true if a line was read or false if end-of-file was reached.
  */
-static bool ReadNextLogLine(ViewLog_t* viewLogP, char* buff, size_t buffSize)
+static bool ReadNextLogLine(ViewLog_t *viewLogP, char *buff, size_t buffSize)
 {
-	char	segmentPath[ PATH_MAX ];
-	int		err;
+	char    segmentPath[ PATH_MAX ];
+	int     err;
 
 	buff[ 0 ] = 0;
 
@@ -978,7 +1019,7 @@ static bool ReadNextLogLine(ViewLog_t* viewLogP, char* buff, size_t buffSize)
 
 			/* make path for this segment */
 			MakeLogFilePath(segmentPath, sizeof(segmentPath),
-				viewLogP->basePath,	viewLogP->nextSegmentIndex);
+			                viewLogP->basePath, viewLogP->nextSegmentIndex);
 
 			viewLogP->nextSegmentIndex--;
 
@@ -988,7 +1029,7 @@ static bool ReadNextLogLine(ViewLog_t* viewLogP, char* buff, size_t buffSize)
 			{
 				err = errno;
 				ErrPrint("Opening file '%s' err = %s\n", segmentPath,
-					strerror(err));
+				         strerror(err));
 
 				/*
 				 * note: we could treat a file open as end-of-file
@@ -1004,11 +1045,13 @@ static bool ReadNextLogLine(ViewLog_t* viewLogP, char* buff, size_t buffSize)
 
 		/* we have an open file segment, read the next line */
 		viewLogP->segmentLineNum++;
+
 		if (fgets(buff, buffSize, viewLogP->segmentFile) != NULL)
 		{
 			/* trim trailing newline */
-			size_t 	sLen;
+			size_t  sLen;
 			sLen = strlen(buff);
+
 			if ((sLen > 0) && (buff[ sLen - 1 ] == '\n'))
 			{
 				buff[ sLen - 1 ] = 0;
@@ -1033,10 +1076,10 @@ static bool ReadNextLogLine(ViewLog_t* viewLogP, char* buff, size_t buffSize)
  * Read the next line from the logical log file into 'buff'.
  * @return true if a line was read or false if end-of-file was reached.
  */
-static bool GetNextLogLine(ViewLog_t* viewLogP, ParsedMsg* parsedMsgP)
+static bool GetNextLogLine(ViewLog_t *viewLogP, ParsedMsg *parsedMsgP)
 {
-	char		buff[ 2048 ];
-	char		errMsg[ 256 ];
+	char        buff[ 2048 ];
+	char        errMsg[ 256 ];
 
 	if (!ReadNextLogLine(viewLogP, buff, sizeof(buff)))
 	{
@@ -1046,10 +1089,10 @@ static bool GetNextLogLine(ViewLog_t* viewLogP, ParsedMsg* parsedMsgP)
 	if (!ParseLogLine(buff, parsedMsgP, errMsg, sizeof(errMsg)))
 	{
 		ErrPrint("Parse log %s segment %d line %d error: %s\n",
-			viewLogP->basePath,
-			viewLogP->nextSegmentIndex + 1,
-			viewLogP->segmentLineNum,
-			errMsg);
+		         viewLogP->basePath,
+		         viewLogP->nextSegmentIndex + 1,
+		         viewLogP->segmentLineNum,
+		         errMsg);
 
 		return false;
 	}
@@ -1061,19 +1104,19 @@ static bool GetNextLogLine(ViewLog_t* viewLogP, ParsedMsg* parsedMsgP)
 /**
  * @brief DoView2
  */
-static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
-	FILE* output)
+static void DoView2(const ViewConfig_t *configP, const ViewFormat_t *formatP,
+                    FILE *output)
 {
-	ViewLogs_t	viewLogs;
-	ViewLog_t*	viewLogP;
-	int			iLogFile;
-	bool		gotLine    [ PMLOGVIEW_MAX_LOG_FILES ];
-	ParsedMsg*	parsedMsgs [ PMLOGVIEW_MAX_LOG_FILES ];
-	ParsedMsg*	parsedMsgP;
-	ParsedMsg*	theParsedMsgP;
-	int			theLogFile;
-	char		buff[ 2048 ];
-	int			cmp;
+	ViewLogs_t  viewLogs;
+	ViewLog_t  *viewLogP;
+	int         iLogFile;
+	bool        gotLine    [ PMLOGVIEW_MAX_LOG_FILES ];
+	ParsedMsg  *parsedMsgs [ PMLOGVIEW_MAX_LOG_FILES ];
+	ParsedMsg  *parsedMsgP;
+	ParsedMsg  *theParsedMsgP;
+	int         theLogFile;
+	char        buff[ 2048 ];
+	int         cmp;
 
 	/* clear memory */
 	memset(&viewLogs, 0, sizeof(viewLogs));
@@ -1081,7 +1124,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 
 	for (iLogFile = 0; iLogFile < PMLOGVIEW_MAX_LOG_FILES; iLogFile++)
 	{
-		parsedMsgs[iLogFile] = (ParsedMsg*) malloc(sizeof(*parsedMsgs[iLogFile]));
+		parsedMsgs[iLogFile] = (ParsedMsg *) malloc(sizeof(*parsedMsgs[iLogFile]));
 	}
 
 	/* clear logical data */
@@ -1089,11 +1132,11 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 	{
 		viewLogP = &viewLogs.viewLogs[ iLogFile ];
 
-		viewLogP->basePath			= NULL;
-		viewLogP->numSegments		= 0;
-		viewLogP->nextSegmentIndex	= -1;
-		viewLogP->segmentFile		= NULL;
-		viewLogP->segmentLineNum	= 0;
+		viewLogP->basePath          = NULL;
+		viewLogP->numSegments       = 0;
+		viewLogP->nextSegmentIndex  = -1;
+		viewLogP->segmentFile       = NULL;
+		viewLogP->segmentLineNum    = 0;
 	}
 
 	/* initialize counters on all log files */
@@ -1104,7 +1147,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 		viewLogP->basePath = configP->logFilePaths[ iLogFile ];
 
 		GetLogFileNumSegments(viewLogP->basePath,
-			&viewLogP->numSegments);
+		                      &viewLogP->numSegments);
 
 		viewLogP->nextSegmentIndex = viewLogP->numSegments - 1;
 	}
@@ -1123,6 +1166,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 		/* pick the oldest line */
 		theParsedMsgP = NULL;
 		theLogFile = -1;
+
 		for (iLogFile = 0; iLogFile < configP->numLogs; iLogFile++)
 		{
 			if (!gotLine[ iLogFile ])
@@ -1143,6 +1187,7 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 
 			/* if previous message is newer, take this one */
 			cmp = PrvCmpTimeVals(&theParsedMsgP->tv, &parsedMsgP->tv);
+
 			if (cmp > 0)
 			{
 				theParsedMsgP = parsedMsgP;
@@ -1194,20 +1239,21 @@ static void DoView2(const ViewConfig_t* configP, const ViewFormat_t* formatP,
 /**
  * @brief DoView
  */
-static bool DoView(const ViewConfig_t* configP, const ViewFormat_t* formatP,
-	const char* outputFilePath)
+static bool DoView(const ViewConfig_t *configP, const ViewFormat_t *formatP,
+                   const char *outputFilePath)
 {
-	FILE*	f;
-	int		err;
+	FILE   *f;
+	int     err;
 
 	if (outputFilePath != NULL)
 	{
 		f = fopen(outputFilePath, "w");
+
 		if (f == NULL)
 		{
 			err = errno;
 			ErrPrint("Error opening output %s: %s\n", outputFilePath,
-				strerror(err));
+			         strerror(err));
 			return false;
 		}
 	}
@@ -1233,23 +1279,24 @@ static bool DoView(const ViewConfig_t* configP, const ViewFormat_t* formatP,
  * Read the list of log files from the PmLog.conf file.
  * A bit of a hack...
  */
-static bool PrvReadLogFileInfo(ViewConfig_t* configP)
+static bool PrvReadLogFileInfo(ViewConfig_t *configP)
 {
-	const char* kConfigFile = "@WEBOS_INSTALL_SYSCONFDIR@/PmLog/PmLog.conf";
-	const char* linePrefix = "File=";
+	const char *kConfigFile = "@WEBOS_INSTALL_SYSCONFDIR@/PmLog/PmLog.conf";
+	const char *linePrefix = "File=";
 
-	FILE*	f;
-	int		err;
-	char	line[ 1024 ];
-	size_t	linePrefixLen;
-	size_t	len;
+	FILE   *f;
+	int     err;
+	char    line[ 1024 ];
+	size_t  linePrefixLen;
+	size_t  len;
 
 	f = fopen(kConfigFile, "r");
+
 	if (f == NULL)
 	{
 		err = errno;
 		ErrPrint("Config error on %s: Failed open: %s\n", kConfigFile,
-			strerror(err));
+		         strerror(err));
 		return false;
 	}
 
@@ -1280,7 +1327,7 @@ static bool PrvReadLogFileInfo(ViewConfig_t* configP)
 		if (configP->numLogs >= PMLOGVIEW_MAX_LOG_FILES)
 		{
 			ErrPrint("Config error on %s: Too many File entries matched\n",
-				kConfigFile);
+			         kConfigFile);
 			break;
 		}
 
@@ -1294,7 +1341,7 @@ static bool PrvReadLogFileInfo(ViewConfig_t* configP)
 	if (configP->numLogs == 0)
 	{
 		ErrPrint("Config error on %s: No File entries matched\n",
-			kConfigFile);
+		         kConfigFile);
 		return false;
 	}
 
@@ -1307,11 +1354,11 @@ static bool PrvReadLogFileInfo(ViewConfig_t* configP)
  *
  * Usage: view ??
  */
-Result DoCmdView(int argc, char* argv[])
+Result DoCmdView(int argc, char *argv[])
 {
-	ViewConfig_t	config;
-	ViewFormat_t	format;
-	const char*		outputFilePath;
+	ViewConfig_t    config;
+	ViewFormat_t    format;
+	const char     *outputFilePath;
 
 	memset(&config, 0, sizeof(config));
 	memset(&format, 0, sizeof(format));
@@ -1322,9 +1369,9 @@ Result DoCmdView(int argc, char* argv[])
 	}
 
 	/*TODO: options parsing */
-	format.useFullTimeStamps		= true;
-	format.timeStampFracSecDigits	= 6;
-	format.showHostName				= true;
+	format.useFullTimeStamps        = true;
+	format.timeStampFracSecDigits   = 6;
+	format.showHostName             = true;
 
 	outputFilePath = NULL;
 
